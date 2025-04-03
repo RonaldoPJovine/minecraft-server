@@ -16,7 +16,9 @@ jobs:
         run: |
           wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
           unzip ngrok-stable-linux-amd64.zip
+          chmod +x ngrok  # Asegurar que ngrok tiene permisos de ejecución
           ./ngrok authtoken ${{ secrets.NGROK_AUTH }}
+
 
       - name: Exponer el servidor con Ngrok
         run: nohup ./ngrok tcp 25565 > ngrok.log 2>&1 &
