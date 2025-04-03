@@ -1,33 +1,28 @@
-name: Minecraft Server  
-on:  
-  workflow_dispatch:  # Permite ejecutarlo manualmente  
-jobs:  
-  run-server:  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Clonar el repositorio  
-        uses: actions/checkout@v3  
+name: Minecraft Server with Ngrok
 
-      - name: Instalar Java  
-        run: sudo apt-get install openjdk-17-jre-headless -y  
+on: [push]
 
-      - name: Descargar server.jar  
-        run: wget -O server.jar https://launcher.mojang.com/v1/objects/YOUR_SERVER_JAR_HASH/server.jar  
+jobs:
+  start-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
 
-      - name: Crear archivo server.properties  
+      - name: Instalar dependencias necesarias
+        run: sudo apt-get install -y wget unzip
+
+      - name: Descargar e instalar Ngrok
         run: |
-          cat <<EOT > server.properties
-          server-port=25565
-          online-mode=false
-          enable-command-block=true
-          gamemode=survival
-          difficulty=normal
-          motd=Servidor Minecraft en GitHub Actions 🚀
-          max-players=20
-          EOT
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          ./ngrok authtoken ${{ secrets.NGROK_AUTH }}
 
-      - name: Aceptar EULA  
-        run: echo "eula=true" > eula.txt  
+      - name: Exponer el servidor con Ngrok
+        run: nohup ./ngrok tcp 25565 > ngrok.log 2>&1 &
 
-      - name: Iniciar el Servidor  
-        run: java -Xmx2G -Xms2G -jar server.jar nogui  
+      - name: Obtener dirección de conexión
+        run: cat ngrok.log | grep -o 'tcp://[^ ]*'
+
+      - name: Mantener el proceso en ejecución
+        run: sleep infinity
