@@ -1,0 +1,33 @@
+name: Minecraft Server  
+on:  
+  workflow_dispatch:  # Permite ejecutarlo manualmente  
+jobs:  
+  run-server:  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Clonar el repositorio  
+        uses: actions/checkout@v3  
+
+      - name: Instalar Java  
+        run: sudo apt-get install openjdk-17-jre-headless -y  
+
+      - name: Descargar server.jar  
+        run: wget -O server.jar https://launcher.mojang.com/v1/objects/YOUR_SERVER_JAR_HASH/server.jar  
+
+      - name: Crear archivo server.properties  
+        run: |
+          cat <<EOT > server.properties
+          server-port=25565
+          online-mode=false
+          enable-command-block=true
+          gamemode=survival
+          difficulty=normal
+          motd=Servidor Minecraft en GitHub Actions 🚀
+          max-players=20
+          EOT
+
+      - name: Aceptar EULA  
+        run: echo "eula=true" > eula.txt  
+
+      - name: Iniciar el Servidor  
+        run: java -Xmx2G -Xms2G -jar server.jar nogui  
