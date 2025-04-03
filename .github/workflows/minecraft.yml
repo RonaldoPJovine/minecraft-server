@@ -17,16 +17,14 @@ jobs:
         run: |
           wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
           unzip ngrok-stable-linux-amd64.zip
-          chmod +x ngrok  # Asegurar que ngrok tiene permisos de ejecución
-          ./ngrok authtoken ${{ secrets.NGROK_AUTH }} 
-      - name: Verificar instalación de Ngrok
-        run: ./ngrok --version
-        
-      - name: Exponer el servidor con Ngrok
-        run: nohup ./ngrok tcp 25565 > ngrok.log 2>&1 &
+          chmod +x ngrok
+          ./ngrok authtoken ${{ secrets.NGROK_AUTH }}
 
-      - name: Obtener dirección de conexión
-        run: cat ngrok.log | grep -o 'tcp://[^ ]*'
+      - name: Exponer el servidor con Ngrok
+        run: nohup ./ngrok http --url=delicate-ready-burro.ngrok-free.app 80 > ngrok.log 2>&1 &
+
+      - name: Mostrar la dirección de conexión
+        run: cat ngrok.log | grep -o 'http://[^ ]*'
 
       - name: Mantener el proceso en ejecución
         run: sleep infinity
